@@ -153,3 +153,8 @@ Se tentar cadastrar uma consulta (via `POST`) com data retroativa ou fora do hor
 A API foi implantada com sucesso e está rodando em um ambiente de produção na nuvem:
 
 * **URL da Documentação Interativa (Swagger/OpenAPI):** [https://desafio-tecnico-back-end-django-production.up.railway.app](https://desafio-tecnico-back-end-django-production.up.railway.app)
+
+* 🔑 Credenciais de Teste para Autenticação (JWT):
+- **Username:** test_user
+- **Password:** Teste2026
+*(Utilize estas credenciais no endpoint `/api/token/` para gerar o token de acesso direto pelo Swagger ou pelo App Mobile).*
