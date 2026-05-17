@@ -145,3 +145,11 @@ GET http://localhost:8000/api/consultas/?data=2026-05-20
 ## 🛡️ Regras de Negócio e Validações de Backend
 
 Se tentar cadastrar uma consulta (via `POST`) com data retroativa ou fora do horário comercial permitido, a camada isolada de serviços (`services.py`) interceptará a requisição e retornará um erro HTTP `400 Bad Request`, detalhando a infração de negócio.
+
+---
+
+## 🌐 Link da API em Produção (Live Demo)
+
+A API foi implantada com sucesso e está rodando em um ambiente de produção na nuvem:
+
+* **URL da Documentação Interativa (Swagger/OpenAPI):** [https://desafio-tecnico-back-end-django-production.up.railway.app](https://desafio-tecnico-back-end-django-production.up.railway.app)
