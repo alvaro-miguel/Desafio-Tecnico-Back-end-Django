@@ -13,9 +13,8 @@ class ConsultaViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['especialista', 'data']
 
-
     def perform_create(self, serializer):
-        serializer.save(paciente=self.request.user)
+        serializer.save()
 
 
 class EspecialistaViewSet(viewsets.ModelViewSet):
