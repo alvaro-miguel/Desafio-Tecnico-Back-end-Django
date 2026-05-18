@@ -264,6 +264,10 @@ https://desafio-tecnico-back-end-django-production.up.railway.app/api/
 ```text
 https://desafio-tecnico-back-end-django-production.up.railway.app/admin/
 ```
-├── docker-compose.yml       # Orquestração local do contêiner da aplicação
-├── requirements.txt         # Manifesto de dependências do ecossistema Python
-└── README.md                # Documentação técnica do projeto Backend
+
+🔑 Credenciais Homologadas para Teste
+Para facilitar a avaliação técnica e o mapeamento dos fluxos do ecossistema móvel na live demo, utilize a conta de superusuário configurada abaixo:
+
+Usuário (Username): user_admin
+
+Senha (Password): senha2026
