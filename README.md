@@ -1,160 +1,269 @@
 # ⚙️ API de Gerenciamento de Consultas Médicas - Backend
 
-Este repositório contém o código-fonte da API REST desenvolvida em **Python** e **Django** para o ecossistema de gerenciamento e agendamento de consultas médicas. Esta API foi projetada especificamente para ser consumida pelo aplicativo mobile desenvolvido em **React Native** e **Expo**, fornecendo toda a infraestrutura de dados, persistência e segurança necessárias. O projeto segue boas práticas de arquitetura em camadas, código limpo, segurança e isolamento de ambiente.
+Este repositório contém a API RESTful robusta desenvolvida em **Python** e **Django REST Framework (DRF)** que serve como o motor de dados para o ecossistema de gerenciamento e agendamento de consultas médicas. 
+
+A infraestrutura foi projetada especificamente para alimentar o aplicativo móvel em **React Native / Expo**, fornecendo persistência relacional, isolamento de ambiente, segurança baseada em tokens e regras de negócio centralizadas. O projeto adota uma arquitetura em camadas bem definida, código limpo, conteinerização completa e esteira de deploy contínuo.
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+## 🚀 Tecnologias e Ecossistema Técnico
 
-O ecossistema do backend foi projetado utilizando as seguintes tecnologias e bibliotecas:
+O ecossistema do backend foi estruturado utilizando ferramentas modernas do mercado de desenvolvimento:
 
-* **Python (v3+):** Linguagem core de desenvolvimento.
-* **Django & Django REST Framework (DRF):** Framework base para construção e roteamento da API RESTful de alto desempenho.
-* **Simple JWT:** Mecanismo de autenticação baseado em JSON Web Tokens (Access e Refresh Tokens).
-* **Django Filter:** Mecanismo para criação de filtros relacionais dinâmicos diretamente na URL.
-* **Docker & Docker Compose:** Ferramentas de conteinerização para garantir paridade total entre ambientes de desenvolvimento e produção.
-* **SQLite:** Banco de dados relacional leve utilizado para persistência rápida de dados locais.
+* **Python (v3.11+):** Linguagem principal, estável e fortemente tipada por meio de tipagem estática opcional.
+* **Django & Django REST Framework (DRF):** Framework robusto para a construção ágil de APIs RESTful escaláveis, seguras e com injeção automática de filtros.
+* **Simple JWT:** Camada de segurança e gerenciamento de sessões baseada em JSON Web Tokens (criptografia assimétrica para Access e Refresh Tokens).
+* **Django Filter:** Mecanismo integrado para a criação de filtros relacionais complexos diretamente em parâmetros de URL (`Query Parameters`).
+* **Docker & Docker Compose:** Componentes de isolamento em contêineres, garantindo paridade total de ambiente (`development == production`).
+* **PostgreSQL / SQLite:** Suporte nativo e transparente para bancos relacionais, estruturado via ORM do Django.
 
 ---
 
-## 📦 Como Instalar o Projeto
+## ⚙️ Arquitetura de Pastas e Separação de Conceitos
 
-Existem duas formas de preparar o ambiente: via Docker (Recomendado) ou em ambiente Python local.
+O projeto segue o padrão de design arquitetural modular do Django, separando explicitamente as responsabilidades de roteamento, serialização de dados, modelos relacionais e painel administrativo:
 
-### Opção 1: Via Docker (Recomendado)
-Certifique-se de ter o **Docker** e o **Docker Compose** instalados em sua máquina. Nenhuma instalação local de Python é necessária nesta opção.
+```text
+├── core/                    # Configurações globais do projeto Django
+│   ├── __init__.py
+│   ├── settings.py          # Arquivo central de configurações (Lê variáveis de ambiente do Railway)
+│   ├── urls.py              # Roteamento central da API e endpoints do Swagger/Admin
+│   └── wsgi.py
+├── api/                     # App modular da API de Consultas Médicas
+│   ├── migrations/          # Histórico de evolução e versionamento do Banco de Dados
+│   ├── admin.py             # Configurações avançadas do Painel Administrativo Django
+│   ├── apps.py
+│   ├── models.py            # Modelos Relacionais (Camada de Dados: Consulta, Especialista, Horario)
+│   ├── serializers.py       # Serializadores (Validação de payload, parsing e transformação de tipos)
+│   ├── services.py          # Camada Isolada de Serviços (Regras de negócio e travas de segurança)
+│   ├── urls.py              # Sub-roteamento de endpoints locais da API
+│   └── views.py             # ViewSets (Controladores REST que manipulam as requisições HTTP)
+├── Dockerfile               # Instruções de compilação da imagem Docker do backend
+```
+# 🎯 Recursos de Engenharia Implementados
 
-### Opção 2: Via Ambiente Python Local
-Caso prefira rodar sem Docker, isole o ambiente com uma ferramenta de ambiente virtual:
+## 1. Painel de Controle Operacional (Django Admin)
+
+O projeto utiliza o poderoso ecossistema **Django Admin** como o painel administrativo principal do sistema.
+
+Ele foi estendido e configurado em `api/admin.py` para funcionar como o centro operacional do ecossistema móvel.
+
+### 👑 Inserção de Especialistas
+
+Através desta interface visual segura, administradores e clínicas podem:
+
+- cadastrar médicos especialistas;
+- definir áreas de atuação;
+- gerenciar informações médicas.
+
+### 🕒 Gerenciamento de Horários
+
+Permite a triagem e o cadastro prévio da malha de horários disponíveis para consulta no banco de dados.
+
+### 📊 Auditoria de Consultas
+
+O painel oferece uma visão analítica em tempo real de todas as consultas agendadas pelo aplicativo móvel, permitindo:
+
+- filtros por data;
+- exclusões em lote;
+- alterações de urgência;
+- gerenciamento direto no banco de dados.
+
+---
+
+## 2. Autenticação Segura de Duplo Fator (Simple JWT)
+
+A API expõe rotas seguras para geração e renovação de credenciais.
+
+Ao efetuar login, o aplicativo recebe:
+
+- um token de acesso de curta duração;
+- um token de atualização.
+
+O acesso aos endpoints protegidos exige o envio do cabeçalho:
+
+```http
+Authorization: Bearer <token>
+```
+
+Isso protege as informações médicas contra acessos não autorizados.
+
+---
+
+## 3. Camada Isolada de Negócio (`services.py`)
+
+Para evitar modelos inflados ou controladores complexos, toda a lógica operacional fica concentrada na camada de serviços.
+
+### 📅 Validação de Retroatividade
+
+O backend intercepta o payload e impede que consultas sejam agendadas com datas passadas.
+
+### ⏰ Controle de Horário Comercial
+
+Filtros interceptam pedidos de agendamento e barram marcações fora do horário operacional estabelecido pela clínica.
+
+Quando isso ocorre, a API retorna:
+
+```http
+400 Bad Request
+```
+
+---
+
+## 4. Serializadores Avançados (`serializers.py`)
+
+Os serializadores possuem dupla responsabilidade no ecossistema da aplicação.
+
+### ✍️ Métodos de Escrita (POST/PUT/PATCH)
+
+- validação de IDs relacionais;
+- integridade dos dados enviados.
+
+### 📖 Métodos de Leitura (GET)
+
+Os endpoints retornam objetos detalhados contendo:
+
+- nome do médico;
+- especialidade;
+- horário formatado;
+- informações completas da consulta.
+
+Isso reduz chamadas adicionais no aplicativo móvel.
+
+---
+
+# 🛣️ Matriz de Endpoints da API REST
+
+| Método | Endpoint | Autenticação | Descrição |
+|---|---|---|---|
+| POST | `/api/token/` | Não | Recebe credenciais (`username/password`) e retorna os Tokens JWT |
+| POST | `/api/token/refresh/` | Não | Renova o Access Token utilizando o Refresh Token |
+| GET | `/api/consultas/` | Sim (JWT) | Lista todas as consultas do usuário autenticado |
+| POST | `/api/consultas/` | Sim (JWT) | Cria um novo agendamento validando regras de data/hora |
+| GET | `/api/consultas/<id>/` | Sim (JWT) | Retorna os detalhes completos de uma consulta |
+| PUT | `/api/consultas/<id>/` | Sim (JWT) | Atualização completa da consulta |
+| PATCH | `/api/consultas/<id>/` | Sim (JWT) | Atualização parcial da consulta |
+| DELETE | `/api/consultas/<id>/` | Sim (JWT) | Remove permanentemente a consulta |
+
+---
+
+# 🔍 Parâmetros de Busca Dinâmica (Query Filters)
+
+O endpoint:
+
+```http
+GET /api/consultas/
+```
+
+possui filtros dinâmicos acoplados diretamente via Query Parameters.
+
+## Filtrar por Médico Especialista
+
+```http
+/api/consultas/?medico=NomeDoEspecialista
+```
+
+## Filtrar por Data Específica
+
+```http
+/api/consultas/?data=2026-05-20
+```
+
+---
+
+# 📦 Como Instalar e Executar o Projeto Localmente
+
+## Opção 1: Via Docker (Recomendado)
+
+Certifique-se de possuir:
+
+- Docker;
+- Docker Compose.
+
+Na raiz do projeto backend execute:
 
 ```bash
-# 1. Clonar o repositório
-git clone https://github.com/alvaro-miguel/Desafio-Tecnico-Back-end-Django.git
-cd Desafio-Tecnico-Back-end-Django
+docker-compose up --build
+```
 
-# 2. Criar e ativar o ambiente virtual (Virtualenv)
+O Docker irá:
+
+- baixar a imagem do Python;
+- instalar dependências;
+- executar migrações;
+- expor o servidor na porta `8000`.
+
+---
+
+## Opção 2: Ambiente Python Local
+
+### 1. Criar e Ativar Ambiente Virtual
+
+```bash
 python -m venv venv
-# No Windows:
-.\venv\Scripts\activate
-# No Linux/macOS:
-source venv/bin/activate
+```
 
-# 3. Instalar as dependências necessárias
+### Windows
+
+```bash
+.\venv\Scripts\activate
+```
+
+### Linux/macOS
+
+```bash
+source venv/bin/activate
+```
+
+---
+
+### 2. Instalar Dependências
+
+```bash
 pip install -r requirements.txt
 ```
 
-## ⚙️ Como Executar o Projeto
-
-### 🐳 Rodando com Docker (Orquestração Completa)
-
-Na raiz do projeto (onde está localizado o arquivo `docker-compose.yml`), execute os comandos abaixo no terminal:
-
-```bash
-# 1. Subir os contêineres em segundo plano
-docker compose up -d
-
-# 2. Executar as migrações para estruturar as tabelas do banco de dados
-docker compose exec api python manage.py migrate
-
-# 3. Criar o usuário administrador do sistema (Django Admin)
-docker compose exec api python manage.py createsuperuser
-```
-
-O servidor da API estará ativo e respondendo no endereço local:
-
-```text
-http://localhost:8000/
-```
-
 ---
 
-### 💻 Rodando Localmente (Sem Docker)
-
-Caso tenha instalado as dependências via ambiente virtual, execute:
+### 3. Executar Migrações do Banco
 
 ```bash
 python manage.py migrate
+```
+
+---
+
+### 4. Criar Superusuário
+
+```bash
 python manage.py createsuperuser
-python manage.py runserver
 ```
 
 ---
 
-## 🧪 Como Testar a API
+### 5. Iniciar o Servidor de Desenvolvimento
 
-### 🔑 Endpoint Crítico: Autenticação (Simple JWT)
-
-A API possui rotas protegidas que exigem um token Bearer válido para manipulação dos dados de consultas.
-
-#### URL de geração do token
-
-```http
-POST http://localhost:8000/api/token/
-```
-
-#### Corpo da requisição (JSON)
-
-```json
-{
-  "username": "seu_usuario_admin",
-  "password": "sua_senha_cadastrada"
-}
-```
-
-#### Resposta esperada
-
-Você receberá um objeto contendo o `access token`. Copie este valor para utilizar nas próximas requisições através do cabeçalho:
-
-```http
-Authorization: Bearer <seu_token_access>
+```bash
+python manage.py runserver 0.0.0.0:8000
 ```
 
 ---
 
-## 🔄 Endpoints do CRUD de Consultas (`/api/consultas/`)
+# 🌐 API em Produção (Live Demo)
 
-| Método | Endpoint | Protegido? | Descrição |
-|---|---|---|---|
-| GET | `/api/consultas/` | Sim | Lista todas as consultas cadastradas |
-| GET | `/api/consultas/<id>/` | Sim | Retorna os detalhes de uma consulta específica |
-| POST | `/api/consultas/` | Sim | Cadastra uma nova consulta médica |
-| PUT | `/api/consultas/<id>/` | Sim | Atualiza todos os dados de uma consulta existente |
-| PATCH | `/api/consultas/<id>/` | Sim | Atualiza dados parciais de uma consulta existente |
-| DELETE | `/api/consultas/<id>/` | Sim | Remove uma consulta do banco de dados |
+O backend está hospedado na plataforma Railway com integração contínua via GitHub.
 
----
+## 🔗 URL Base da API
 
-## 🔍 Filtros Dinâmicos Disponíveis (Diferencial)
-
-Você pode aplicar parâmetros diretamente na URL do método `GET` para refinar as buscas.
-
-### Filtrar por especialista
-
-```http
-GET http://localhost:8000/api/consultas/?medico=NomeDoMedico
+```text
+https://desafio-tecnico-back-end-django-production.up.railway.app/api/
 ```
 
-### Filtrar por data específica
+## 🔗 Painel Administrativo (Django Admin)
 
-```http
-GET http://localhost:8000/api/consultas/?data=2026-05-20
+```text
+https://desafio-tecnico-back-end-django-production.up.railway.app/admin/
 ```
-
----
-
-## 🛡️ Regras de Negócio e Validações de Backend
-
-Se tentar cadastrar uma consulta (via `POST`) com data retroativa ou fora do horário comercial permitido, a camada isolada de serviços (`services.py`) interceptará a requisição e retornará um erro HTTP `400 Bad Request`, detalhando a infração de negócio.
-
----
-
-## 🌐 Link da API em Produção (Live Demo)
-
-A API foi implantada com sucesso e está rodando em um ambiente de produção na nuvem:
-
-* **URL da Documentação Interativa (Swagger/OpenAPI):** [https://desafio-tecnico-back-end-django-production.up.railway.app](https://desafio-tecnico-back-end-django-production.up.railway.app)
-
-* 🔑 Credenciais de Teste para Autenticação (JWT):
-- **Username:** user_admin
-- **Password:** senha2026
-*(Utilize estas credenciais no endpoint `/api/token/` para gerar o token de acesso direto pelo Swagger ou pelo App Mobile).*
+├── docker-compose.yml       # Orquestração local do contêiner da aplicação
+├── requirements.txt         # Manifesto de dependências do ecossistema Python
+└── README.md                # Documentação técnica do projeto Backend
