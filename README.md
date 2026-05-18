@@ -263,7 +263,7 @@ O backend encontra-se hospedado na plataforma Railway com integração contínua
 ## 🔗 URL Base da API
 
 ```text
-https://desafio-tecnico-back-end-django-production.up.railway.app/api/
+https://desafio-tecnico-back-end-django-production.up.railway.app/api/docs/
 ```
 
 ## 🔗 Painel Administrativo
