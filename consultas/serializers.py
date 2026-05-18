@@ -20,13 +20,10 @@ class EspecialistaSerializer(serializers.ModelSerializer):
 class ConsultaSerializer(serializers.ModelSerializer):
     especialista_detalhes = EspecialistaSerializer(source='especialista', read_only=True)
     
-    # ✨ A MÁGICA AQUI: Em vez de chamar o serializer completo, pegamos apenas a string do horário direto do relacionamento!
-    # O 'source' navega de 'horario_selecionado' para o campo 'horario' de dentro dele e formata como string.
     horario_texto = serializers.ReadOnlyField(source='horario_selecionado.horario')
 
     class Meta:
         model = Consulta
-        # Substituímos 'horario_detalhes' por 'horario_texto'
         fields = ['id', 'data', 'horario_selecionado', 'horario_texto', 'localizacao', 'especialista', 'especialista_detalhes']
         extra_kwargs = {
             'data': {'required': True},
