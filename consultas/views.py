@@ -14,6 +14,10 @@ class ConsultaViewSet(viewsets.ModelViewSet):
     filterset_fields = ['especialista', 'data']
 
 
+    def perform_create(self, serializer):
+        serializer.save(paciente=self.request.user)
+
+
 class EspecialistaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Especialista.objects.all()
