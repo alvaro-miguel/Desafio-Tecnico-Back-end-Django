@@ -39,7 +39,7 @@ O projeto segue uma arquitetura modular baseada no padrão do Django, separando 
 │   ├── urls.py                  # Rotas globais da aplicação
 │   └── wsgi.py
 │
-├── api/                          # Aplicação principal da API
+├── consultas/                          # Aplicação principal da API
 │   ├── migrations/              # Histórico de migrações do banco
 │   ├── admin.py                 # Configurações do Django Admin
 │   ├── apps.py
