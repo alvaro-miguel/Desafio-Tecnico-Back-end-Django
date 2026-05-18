@@ -290,6 +290,3 @@ Para facilitar testes e validações da aplicação:
 - O projeto foi desenvolvido seguindo princípios de separação de responsabilidades.
 - A API está preparada para ambientes escaláveis e conteinerizados.
 - Toda a estrutura foi organizada visando manutenção, legibilidade e expansão futura do sistema.
-│
-├── Dockerfile                   # Configuração da imagem Docker
-└── docker-compose.yml           # Orquestração dos containers
