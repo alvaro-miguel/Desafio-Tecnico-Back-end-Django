@@ -19,9 +19,11 @@ class EspecialistaSerializer(serializers.ModelSerializer):
 
 class ConsultaSerializer(serializers.ModelSerializer):
     especialista_detalhes = EspecialistaSerializer(source='especialista', read_only=True)
+    horario_detalhes = HorarioDisponivelSerializer(source='horario_selecionado', read_only=True)
 
     class Meta:
         model = Consulta
+        fields = ['id', 'data', 'horario_selecionado', 'horario_detalhes', 'localizacao', 'especialista', 'especialista_detalhes']
         fields = ['id', 'data', 'horario_selecionado', 'localizacao', 'especialista', 'especialista_detalhes']
         extra_kwargs = {
             'data': {'required': True},
